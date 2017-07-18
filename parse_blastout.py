@@ -49,6 +49,7 @@ for blast_record in blast_records:
 		#the alignment title format is odd, I need to parse it to get the correct name
 		match=re.match(r'(gnl\|BL_ORD_ID\|\d+\s)(.+)', alignment.title)
 		parsed_alignment=match.group(2)
+		parsed_alignment=parsed_alignment.replace(" ", "_")
 		qlen_placeholder=" "*len(str(qlen))
 		num_alignments_placeholder=" "*len(str(num_alignments))
 		parsed_alignment_placeholder=" "*len(parsed_alignment)		
