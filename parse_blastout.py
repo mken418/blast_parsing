@@ -13,13 +13,15 @@ print "Thank you for using Matt K's biopython BLAST parser"
 #HSPs are high scoring pairs within an alignment
 #The output will list the query name for each HSP, but will not repeat the other information
 #different query sequences are separated by a divider
+#If the seqs flag is specified, the program will output the HSP query and reference sequences in the 7th and 8th columns, respectively
 
 #command line arguments
 parser=argparse.ArgumentParser(description='This script will parse a blast output file')
 parser.add_argument('-infile', type=str, required=True, help='full path blast results file in xml format')
 parser.add_argument('-outfile', type=str, required=True, help='full path name of parsed output file')
+parser.add_argument('-seqs', action='store_true', help='add option if you want the program to output the HSP sequence') #Note that we now specify a new keyword, action, and give it the value "store_true". This means that, if the option is specified, assign the value True to args.verbose. Not specifying it implies False.
 args=parser.parse_args()
-(infile, outfile)=(args.infile, args.outfile)
+(infile, outfile, seqs)=(args.infile, args.outfile, args.seqs)
 
 
 #make file handle of blast results
@@ -29,7 +31,11 @@ result_handle=open(infile)
 blast_records=NCBIXML.parse(result_handle)
 
 outfile_handle=open(outfile, "w")
-outfile_handle.write("Query\tQuery_len\tNum_alignments\tAlignment_hit\tHSP_evalue\tHSP_length\n")
+
+if seqs:
+	outfile_handle.write("Query\tQuery_len\tNum_alignments\tAlignment_hit\tHSP_evalue\tHSP_length\tHSP_query_seq\tHSP_subject_seq\n")
+else:
+	outfile_handle.write("Query\tQuery_len\tNum_alignments\tAlignment_hit\tHSP_evalue\tHSP_length\n")
 
 for blast_record in blast_records:
 	query=blast_record.query
@@ -39,7 +45,10 @@ for blast_record in blast_records:
 	#alignmetns is a list
 	num_alignments=len(blast_record.alignments)
 	if num_alignments==0:
-		outfile_handle.write(query+"\t"+str(qlen)+"\t"+str(num_alignments)+"\t"+"NA\tNA\tNA\n")
+		if seqs:
+			outfile_handle.write(query+"\t"+str(qlen)+"\t"+str(num_alignments)+"\t"+"NA\tNA\tNA\tNA\tNA\n")
+		else:
+			outfile_handle.write(query+"\t"+str(qlen)+"\t"+str(num_alignments)+"\t"+"NA\tNA\tNA\n")
 		divider= "~"*120
 		outfile_handle.write(divider+"\n") 
 		continue
@@ -53,18 +62,26 @@ for blast_record in blast_records:
 		qlen_placeholder=" "*len(str(qlen))
 		num_alignments_placeholder=" "*len(str(num_alignments))
 		parsed_alignment_placeholder=" "*len(parsed_alignment)		
-
 		first_hsp_iteration=True
 		for hsp in alignment.hsps:
 			if first_hsp_iteration==True and first_alignment_iteration==True:
-				outfile_handle.write(query+"\t"+str(qlen)+"\t"+str(num_alignments)+"\t"+parsed_alignment+"\t"+str(hsp.expect)+"\t"+str(hsp.align_length)+"\n")
+				if seqs:
+					outfile_handle.write(query+"\t"+str(qlen)+"\t"+str(num_alignments)+"\t"+parsed_alignment+"\t"+str(hsp.expect)+"\t"+str(hsp.align_length)+"\t"+hsp.query+"\t"+hsp.sbjct+"\n")
+				else:
+					outfile_handle.write(query+"\t"+str(qlen)+"\t"+str(num_alignments)+"\t"+parsed_alignment+"\t"+str(hsp.expect)+"\t"+str(hsp.align_length)+"\n")
 				first_hsp_iteration=False
 				first_alignment_iteration=False
 			elif first_hsp_iteration==True and first_alignment_iteration==False:
-				outfile_handle.write(query+"\t"+qlen_placeholder+"\t"+num_alignments_placeholder+"\t"+parsed_alignment+"\t"+str(hsp.expect)+"\t"+str(hsp.align_length)+"\n")
+				if seqs:
+					outfile_handle.write(query+"\t"+qlen_placeholder+"\t"+num_alignments_placeholder+"\t"+parsed_alignment+"\t"+str(hsp.expect)+"\t"+str(hsp.align_length)+"\t"+hsp.query+"\t"+hsp.sbjct+"\n")
+				else:
+					outfile_handle.write(query+"\t"+qlen_placeholder+"\t"+num_alignments_placeholder+"\t"+parsed_alignment+"\t"+str(hsp.expect)+"\t"+str(hsp.align_length)+"\n")
 				first_hsp_iteration=False
 			else:
-				outfile_handle.write(query+"\t"+qlen_placeholder+"\t"+num_alignments_placeholder+"\t"+parsed_alignment_placeholder+"\t"+str(hsp.expect)+"\t"+str(hsp.align_length)+"\n")
+				if seqs:
+					outfile_handle.write(query+"\t"+qlen_placeholder+"\t"+num_alignments_placeholder+"\t"+parsed_alignment_placeholder+"\t"+str(hsp.expect)+"\t"+str(hsp.align_length)+"\t"+hsp.query+"\t"+hsp.sbjct+"\n")
+				else:	
+					outfile_handle.write(query+"\t"+qlen_placeholder+"\t"+num_alignments_placeholder+"\t"+parsed_alignment_placeholder+"\t"+str(hsp.expect)+"\t"+str(hsp.align_length)+"\n")
 
 	divider= "~"*120
 	outfile_handle.write(divider+"\n")
