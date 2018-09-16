@@ -1,4 +1,4 @@
-#!/usr/local/apps/bioapps/python/Python-2.7.13/bin/python2.7
+#!/usr/bin/env python
 
 import operator
 import re
@@ -6,7 +6,8 @@ from Bio.Blast import NCBIXML
 import argparse
 
 
-print "Thank you for using Matt K's biopython BLAST parser"
+## currently optimized for python2.7. Have not tested this with python3 yet
+
 
 #This script will parse an xml blast file and output a tsv file with the columns denoting query name, length, number of alignments, alignment name, HSP evalue, and HSP length
 #recall that there can be multiple HSPs per alignment, and alignment is a hit on a sibject sequence
